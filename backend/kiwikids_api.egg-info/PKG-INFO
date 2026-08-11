@@ -1,0 +1,5 @@
+Metadata-Version: 2.4
+Name: kiwikids-api
+Version: 0.1.0
+Summary: Backend API for KiwiKids NZ
+Requires-Python: >=3.14
