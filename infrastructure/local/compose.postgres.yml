@@ -1,0 +1,78 @@
+services:
+  postgres:
+    image: postgres@sha256:7958605b474b3d264a969cb3a123d6aa00ad1e1fe9da8a69984dabb704d93317
+    container_name: kiwikids-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: kiwikids
+      POSTGRES_USER: kiwikids_app
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256 --auth-local=scram-sha-256"
+
+    secrets:
+      - postgres_password
+      - runtime_db_password
+
+    volumes:
+      - /srv/postgresql/data:/var/lib/postgresql/data
+
+    networks:
+      - data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kiwikids_app -d kiwikids"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+    security_opt:
+      - no-new-privileges:true
+
+  api:
+    build:
+      context: ../..
+      dockerfile: backend/Dockerfile
+
+    container_name: kiwikids-api
+    restart: unless-stopped
+
+    environment:
+      KIWIKIDS_DB_HOST: postgres
+      KIWIKIDS_DB_PORT: "5432"
+      KIWIKIDS_DB_NAME: kiwikids
+      KIWIKIDS_DB_USER: kiwikids_runtime
+      KIWIKIDS_DB_PASSWORD_FILE: /run/secrets/runtime_db_password
+
+    secrets:
+      - runtime_db_password
+
+    networks:
+      - app
+      - data
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    ports:
+      - "127.0.0.1:8000:8000"
+
+    security_opt:
+      - no-new-privileges:true
+
+secrets:
+  postgres_password:
+    file: /srv/kiwikids-secrets/postgres_password
+
+  runtime_db_password:
+    file: /srv/kiwikids-secrets/runtime_db_password
+
+networks:
+  app:
+    name: kiwikids-app
+
+  data:
+    name: kiwikids-data
+    internal: true

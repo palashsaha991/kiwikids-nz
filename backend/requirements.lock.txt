@@ -18,7 +18,6 @@ httptools==0.8.0
 httpx2==2.10.0
 idna==3.18
 iniconfig==2.3.0
--e git+ssh://git@github.com/palashsaha991/kiwikids-nz.git@22775b3c17659fa28ff8b63a312873fefdc25831#egg=kiwikids_api&subdirectory=backend
 license-expression==30.4.4
 Mako==1.4.1
 markdown-it-py==4.2.0
