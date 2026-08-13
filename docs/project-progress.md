@@ -2,9 +2,9 @@
 
 ## Current Status
 
-Current phase: Day 4 preparation  
+Current phase: Day 4 COMPLETE — ready for Day 5  
 Core roadmap: 15-day MVP plan  
-Current Git checkpoint: 8071423
+Current Git checkpoint: 0dcdfb5
 
 ---
 
@@ -44,6 +44,7 @@ palashsaha991/kiwikids-nz
 
 Current major commits:
 
+- 0dcdfb5 feat(backend): add secure ECE database migrations and API
 - 8071423 feat(platform): add secure FastAPI and PostgreSQL local stack
 - e60c7f0 feat(backend): initialize FastAPI application and test foundation
 - 22775b3 feat(frontend): add ECE search and service detail experience
@@ -86,6 +87,11 @@ Frontend validation:
 - npm lint passes
 - npm production build passes
 
+Current frontend data state:
+
+- ECE UI still uses mock/frontend data
+- Day 5 will replace mock listing/detail data with the real FastAPI ECE API
+
 ---
 
 ## Backend
@@ -97,7 +103,7 @@ Technology:
 - Uvicorn
 - Pydantic Settings
 - Psycopg 3
-- SQLAlchemy
+- SQLAlchemy 2
 - Alembic
 - pytest
 
@@ -111,13 +117,184 @@ Implemented:
 - /health endpoint
 - /ready endpoint
 - database-aware readiness
-- unit tests
+- lazy SQLAlchemy engine/session creation
+- ECE SQLAlchemy model
+- ECE repository layer
+- ECE Pydantic response schema
+- versioned API router
+- ECE list API
+- ECE detail-by-slug API
+- duplicate-safe development seed script
 - Docker image
 - non-root API container
 
 Tests:
 
 3 tests passing
+
+API routes currently verified:
+
+- GET /health → 200 OK
+- GET /ready → 200 OK with live PostgreSQL check
+- GET /api/v1/ece → 200 OK with real database records
+- GET /api/v1/ece/{slug} → 200 OK for an existing service
+
+---
+
+# Segment 2 — Real Product
+## Day 4 — COMPLETE
+
+Day 4 objectives completed:
+
+- dedicated migration credential
+- Alembic configuration
+- SQLAlchemy database layer
+- ECE database model
+- first migration
+- initial ECE API
+
+### Migration security
+
+Roles:
+
+#### kiwikids_admin
+
+NOLOGIN ownership role.
+
+Owns:
+
+- kiwikids database
+- app schema
+
+#### kiwikids_runtime
+
+FastAPI runtime role.
+
+Properties:
+
+- LOGIN
+- NOSUPERUSER
+- NOCREATEDB
+- NOCREATEROLE
+- NOREPLICATION
+- NOBYPASSRLS
+
+Runtime role cannot create tables.
+
+Negative security test confirmed:
+
+CREATE TABLE app.should_fail_again(id int);
+
+Result:
+
+permission denied for schema app
+
+#### kiwikids_migration
+
+NOLOGIN migration privilege role.
+
+#### kiwikids_migrator
+
+Dedicated LOGIN migration credential.
+
+Properties:
+
+- non-superuser
+- no database creation
+- no role creation
+- no replication
+- no bypass RLS
+- explicit database CONNECT
+- controlled SET ROLE path for Alembic schema ownership operations
+
+Migration secret is stored outside Git and mounted only into the migration tool container.
+
+### Alembic
+
+Alembic initialized under:
+
+backend/migrations
+
+First migration:
+
+356521117ff6_create_ece_services.py
+
+Verified database state:
+
+356521117ff6 (head)
+
+Migration creates:
+
+app.ece_services
+
+The generated migration was reviewed before application.
+
+### ECE database model
+
+The ECE model includes:
+
+- UUID primary key
+- unique slug
+- unique nullable provider code
+- service name and type
+- description
+- address/suburb/city/region/postcode
+- latitude/longitude
+- minimum and maximum ages
+- licensed places
+- 20 Hours ECE participation state
+- controlled availability status
+- ERO/source URLs
+- source freshness timestamp
+- active state
+- created/updated timestamps
+
+Database validation includes:
+
+- valid latitude range
+- valid longitude range
+- non-negative minimum age
+- maximum age cannot be below minimum age
+- licensed places must be positive when supplied
+- controlled availability values
+
+Purposeful indexes:
+
+- name lookup
+- active + availability
+- active + region + suburb + service type discovery
+
+### Seed data
+
+Development-only ECE seed script:
+
+backend/scripts/seed_ece.py
+
+Verified behavior:
+
+First run:
+
+- inserted=3
+- skipped=0
+
+Second run:
+
+- inserted=0
+- skipped=3
+
+The script is duplicate-safe and the sample records are explicitly development data, not official NZ education data.
+
+### End-to-end verification
+
+Verified request path:
+
+FastAPI → SQLAlchemy → kiwikids_runtime → PostgreSQL → app.ece_services
+
+Successful API result:
+
+- ECE list returns database-backed records
+- detail-by-slug returns the correct ECE record
+- runtime user retains least-privilege schema restrictions
 
 ---
 
@@ -147,52 +324,6 @@ Database:
 
 kiwikids
 
-Roles:
-
-### kiwikids_app
-Bootstrap PostgreSQL superuser.
-
-Must NOT be used by application runtime.
-
-### kiwikids_admin
-NOLOGIN ownership role.
-
-Owns:
-
-- kiwikids database
-- app schema
-
-### kiwikids_runtime
-FastAPI runtime role.
-
-Properties:
-
-- LOGIN
-- NOSUPERUSER
-- NOCREATEDB
-- NOCREATEROLE
-- NOREPLICATION
-- NOBYPASSRLS
-
-Runtime role cannot create tables.
-
-Negative security test confirmed:
-
-CREATE TABLE app.should_fail...
-
-Result:
-
-permission denied for schema app
-
-### kiwikids_migration
-NOLOGIN migration privilege role.
-
-Planned for Alembic migration access.
-
----
-
-## Database Schema Security
-
 Database owner:
 
 kiwikids_admin
@@ -205,23 +336,9 @@ Schema owner:
 
 kiwikids_admin
 
-Runtime role:
-
-USAGE on app schema
-
-Default future table privileges:
-
-- SELECT
-- INSERT
-- UPDATE
-- DELETE
-
-Default future sequence privileges:
-
-- USAGE
-- SELECT
-
 Public schema CREATE privilege revoked from PUBLIC.
+
+Runtime role receives only the privileges required for application data access.
 
 ---
 
@@ -242,6 +359,8 @@ devops user is intentionally NOT in docker group.
 
 Docker commands currently run with sudo.
 
+API and migration containers run as non-root user 10001.
+
 ---
 
 ## Local Compose Architecture
@@ -250,13 +369,16 @@ Services:
 
 - kiwikids-postgres
 - kiwikids-api
+- kiwikids-migrate (tools profile)
 
 Networks:
 
 ### kiwikids-app
+
 Application-facing Docker bridge network.
 
 ### kiwikids-data
+
 Internal-only Docker network.
 
 PostgreSQL is connected only to kiwikids-data.
@@ -265,6 +387,8 @@ FastAPI is connected to:
 
 - kiwikids-app
 - kiwikids-data
+
+Migration tooling is connected only to the data network.
 
 PostgreSQL port 5432 is NOT published to host or LAN.
 
@@ -284,10 +408,11 @@ Current secrets:
 
 - postgres_password
 - runtime_db_password
+- migration_db_password
 
 Secrets are never committed to repository.
 
-FastAPI runtime secret is readable only through controlled filesystem permissions.
+FastAPI runtime secret and migration secret are exposed only to the services that require them.
 
 ---
 
@@ -389,7 +514,8 @@ COMPLETE
 ## Segment 2 — Real Product
 Day 4–8
 
-Day 4:
+### Day 4 — COMPLETE
+
 - dedicated migration credential
 - Alembic configuration
 - SQLAlchemy database layer
@@ -397,24 +523,31 @@ Day 4:
 - first migration
 - initial ECE API
 
-Day 5:
-- ECE listing/detail APIs
-- real frontend API integration
+### Day 5 — NEXT
 
-Day 6:
+- strengthen ECE listing/detail APIs as needed for the UI
+- connect Next.js /ece to real FastAPI data
+- connect /ece/[slug] to real FastAPI detail data
+- remove frontend mock ECE data from the live product path
+- preserve loading/error/empty handling foundation
+
+### Day 6
+
 - search
 - filters
 - sorting
 - pagination
 - location model
 
-Day 7:
+### Day 7
+
 - favourites
 - compare
 - validation
 - UX states
 
-Day 8:
+### Day 8
+
 - product flow polish
 - mobile/responsive QA
 - loading/error/empty states
@@ -503,8 +636,8 @@ Posts should explain:
 
 # Exact Next Step
 
-Start Day 4.
+Start Day 5.
 
 First objective:
 
-Create a dedicated migration credential and configure Alembic so database schema changes are version-controlled and separated from FastAPI runtime permissions.
+Connect the existing Next.js ECE listing page to GET /api/v1/ece so the browser displays real PostgreSQL-backed service records instead of frontend mock data.
