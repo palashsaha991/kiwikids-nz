@@ -1,7 +1,7 @@
 """create ece services
 
 Revision ID: 356521117ff6
-Revises: 
+Revises:
 Create Date: 2026-08-13 12:46:28.701538
 
 """
