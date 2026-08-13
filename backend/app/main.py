@@ -1,9 +1,9 @@
 from fastapi import FastAPI, HTTPException, status
 
-from app.core.config import get_settings
+from app.api.router import api_router
+from app.core.config import settings
 from app.db.readiness import check_database
 
-settings = get_settings()
 
 app = FastAPI(
     title=settings.app_name,
@@ -14,7 +14,13 @@ app = FastAPI(
 )
 
 
-@app.get("/health", tags=["Operations"])
+app.include_router(api_router)
+
+
+@app.get(
+    "/health",
+    tags=["System"],
+)
 def health() -> dict[str, str]:
     return {
         "status": "ok",
@@ -22,15 +28,19 @@ def health() -> dict[str, str]:
     }
 
 
-@app.get("/ready", tags=["Operations"])
-def readiness() -> dict[str, str]:
+@app.get(
+    "/ready",
+    tags=["System"],
+)
+def ready() -> dict[str, str]:
     try:
         check_database()
-    except Exception as exc:
+
+    except RuntimeError:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Database dependency is not ready",
-        ) from exc
+        )
 
     return {
         "status": "ready",

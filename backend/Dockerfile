@@ -13,6 +13,8 @@ COPY backend/requirements.lock.txt ./requirements.lock.txt
 RUN pip install --no-cache-dir --requirement requirements.lock.txt
 
 COPY backend/app ./app
+COPY backend/alembic.ini ./alembic.ini
+COPY backend/migrations ./migrations
 
 USER 10001:10001
 

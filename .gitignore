@@ -53,3 +53,6 @@ backups/
 
 # Docker local overrides
 docker-compose.override.yml
+
+# Python build artifacts
+*.egg-info/
