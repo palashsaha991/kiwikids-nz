@@ -3,21 +3,35 @@ import Link from "next/link";
 type ServiceCardProps = {
   name: string;
   type: string;
-  suburb: string;
-  distance: string;
+  location: string;
   ageRange: string;
-  matchScore: number;
-  status: "Available" | "Waitlist" | "Check availability";
+  licensedPlaces: number | null;
+  accepts20HoursEce: boolean | null;
+  status: "Available" | "Waitlist" | "Check availability" | "Unknown";
   slug: string;
 };
+
+function fundingLabel(
+  accepts20HoursEce: boolean | null,
+): string {
+  if (accepts20HoursEce === true) {
+    return "20 Hours ECE";
+  }
+
+  if (accepts20HoursEce === false) {
+    return "No 20 Hours ECE";
+  }
+
+  return "Funding to confirm";
+}
 
 export function ServiceCard({
   name,
   type,
-  suburb,
-  distance,
+  location,
   ageRange,
-  matchScore,
+  licensedPlaces,
+  accepts20HoursEce,
   status,
   slug,
 }: ServiceCardProps) {
@@ -26,12 +40,12 @@ export function ServiceCard({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <div className="mb-2 flex flex-wrap items-center gap-2">
-            <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-              {matchScore}% match
+            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
+              {status}
             </span>
 
-            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
-              {status}
+            <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+              {fundingLabel(accepts20HoursEce)}
             </span>
           </div>
 
@@ -39,7 +53,9 @@ export function ServiceCard({
             {name}
           </h2>
 
-          <p className="mt-1 text-sm text-slate-500">{type}</p>
+          <p className="mt-1 text-sm text-slate-500">
+            {type}
+          </p>
         </div>
 
         <button
@@ -55,21 +71,23 @@ export function ServiceCard({
           <span className="block text-xs font-semibold uppercase tracking-wide text-slate-400">
             Location
           </span>
-          <span className="mt-1 block">{suburb}</span>
+          <span className="mt-1 block">{location}</span>
         </div>
 
         <div>
           <span className="block text-xs font-semibold uppercase tracking-wide text-slate-400">
-            Distance
-          </span>
-          <span className="mt-1 block">{distance}</span>
-        </div>
-
-        <div>
-          <span className="block text-xs font-semibold uppercase tracking-wide text-slate-400">
-            Age
+            Age range
           </span>
           <span className="mt-1 block">{ageRange}</span>
+        </div>
+
+        <div>
+          <span className="block text-xs font-semibold uppercase tracking-wide text-slate-400">
+            Licensed places
+          </span>
+          <span className="mt-1 block">
+            {licensedPlaces ?? "To confirm"}
+          </span>
         </div>
       </div>
 

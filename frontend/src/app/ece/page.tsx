@@ -1,50 +1,41 @@
-import { SiteHeader } from "@/components/layout/SiteHeader";
 import { ServiceCard } from "@/components/ece/ServiceCard";
+import { SiteHeader } from "@/components/layout/SiteHeader";
+import {
+  formatAgeRange,
+  formatAvailability,
+  getEceServices,
+} from "@/lib/ece";
 
-const services = [
-  {
-    name: "Little Steps Early Learning",
-    type: "Education & Care",
-    suburb: "Onehunga, Auckland",
-    distance: "1.2 km",
-    ageRange: "0–5 years",
-    matchScore: 92,
-    status: "Available" as const,
-    slug: "little-steps-early-learning",
-  },
-  {
-    name: "Bright Futures Kindergarten",
-    type: "Kindergarten",
-    suburb: "Onehunga, Auckland",
-    distance: "1.8 km",
-    ageRange: "2–5 years",
-    matchScore: 88,
-    status: "Waitlist" as const,
-    slug: "little-steps-early-learning",
-  },
-  {
-    name: "Sunshine Kids ECE",
-    type: "Education & Care",
-    suburb: "Royal Oak, Auckland",
-    distance: "2.4 km",
-    ageRange: "0–5 years",
-    matchScore: 84,
-    status: "Check availability" as const,
-    slug: "little-steps-early-learning",
-  },
-  {
-    name: "Harbour View Early Learning",
-    type: "Education & Care",
-    suburb: "Onehunga, Auckland",
-    distance: "3.1 km",
-    ageRange: "6 months–5 years",
-    matchScore: 81,
-    status: "Available" as const,
-    slug: "little-steps-early-learning",
-  },
-];
+export default async function EcePage() {
+  let services;
 
-export default function EcePage() {
+  try {
+    services = await getEceServices();
+  } catch {
+    return (
+      <main className="min-h-screen bg-slate-50 text-slate-900">
+        <SiteHeader />
+
+        <section className="container-shell py-16">
+          <div className="rounded-3xl border border-red-200 bg-white p-8 shadow-sm">
+            <p className="text-sm font-semibold uppercase tracking-wider text-red-700">
+              Service unavailable
+            </p>
+
+            <h1 className="mt-2 text-3xl font-bold tracking-tight">
+              We couldn&apos;t load childcare services
+            </h1>
+
+            <p className="mt-3 max-w-xl leading-7 text-slate-600">
+              Please try again shortly. KiwiKids NZ could not reach the
+              childcare data service.
+            </p>
+          </div>
+        </section>
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
       <SiteHeader />
@@ -56,12 +47,12 @@ export default function EcePage() {
           </p>
 
           <h1 className="mt-2 text-4xl font-bold tracking-tight">
-            Childcare near Onehunga
+            Find early learning services
           </h1>
 
           <p className="mt-3 max-w-2xl leading-7 text-slate-600">
-            Explore and compare early learning services based on your location
-            and family preferences.
+            Explore early childhood education services and compare the
+            information that matters to your family.
           </p>
         </div>
       </section>
@@ -82,7 +73,7 @@ export default function EcePage() {
               <input
                 id="location"
                 type="text"
-                defaultValue="Onehunga"
+                placeholder="e.g. Onehunga"
                 className="w-full rounded-xl border border-slate-300 px-3 py-2.5 outline-none focus:border-emerald-600"
               />
             </div>
@@ -97,31 +88,12 @@ export default function EcePage() {
 
               <select
                 id="age"
-                defaultValue="3-5"
+                defaultValue=""
                 className="w-full rounded-xl border border-slate-300 px-3 py-2.5 outline-none focus:border-emerald-600"
               >
+                <option value="">Any age</option>
                 <option value="0-2">0–2 years</option>
                 <option value="3-5">3–5 years</option>
-                <option value="5+">5+ years</option>
-              </select>
-            </div>
-
-            <div>
-              <label
-                htmlFor="distance"
-                className="mb-2 block text-sm font-semibold text-slate-700"
-              >
-                Distance
-              </label>
-
-              <select
-                id="distance"
-                defaultValue="5"
-                className="w-full rounded-xl border border-slate-300 px-3 py-2.5 outline-none focus:border-emerald-600"
-              >
-                <option value="2">Within 2 km</option>
-                <option value="5">Within 5 km</option>
-                <option value="10">Within 10 km</option>
               </select>
             </div>
 
@@ -132,7 +104,7 @@ export default function EcePage() {
 
               <div className="space-y-2 text-sm text-slate-600">
                 {[
-                  "Education & Care",
+                  "Education and Care Service",
                   "Kindergarten",
                   "Playcentre",
                   "Home-based",
@@ -151,6 +123,11 @@ export default function EcePage() {
             >
               Apply filters
             </button>
+
+            <p className="text-xs leading-5 text-slate-500">
+              Search and filtering will become active as part of the Day 6
+              discovery API work.
+            </p>
           </div>
         </aside>
 
@@ -166,19 +143,54 @@ export default function EcePage() {
             <select
               aria-label="Sort services"
               className="rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm"
-              defaultValue="match"
+              defaultValue="name"
+              disabled
             >
-              <option value="match">Best match</option>
-              <option value="distance">Nearest first</option>
               <option value="name">Name A–Z</option>
             </select>
           </div>
 
-          <div className="space-y-5">
-            {services.map((service) => (
-              <ServiceCard key={service.name} {...service} />
-            ))}
-          </div>
+          {services.length === 0 ? (
+            <div className="rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+              <h2 className="text-xl font-bold">
+                No services found
+              </h2>
+
+              <p className="mt-2 text-slate-600">
+                There are currently no active ECE services to display.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-5">
+              {services.map((service) => {
+                const location = [
+                  service.suburb,
+                  service.city,
+                ]
+                  .filter(Boolean)
+                  .join(", ");
+
+                return (
+                  <ServiceCard
+                    key={service.id}
+                    name={service.name}
+                    type={service.service_type}
+                    location={location}
+                    ageRange={formatAgeRange(
+                      service.minimum_age_months,
+                      service.maximum_age_months,
+                    )}
+                    licensedPlaces={service.licensed_places}
+                    accepts20HoursEce={service.accepts_20_hours_ece}
+                    status={formatAvailability(
+                      service.availability_status,
+                    )}
+                    slug={service.slug}
+                  />
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
     </main>
