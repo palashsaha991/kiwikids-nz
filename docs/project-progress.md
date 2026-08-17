@@ -2,9 +2,9 @@
 
 ## Current Status
 
-Current phase: Day 7 COMPLETE — ready for Day 8
+Current phase: Day 9 COMPLETE — ready for Day 10
 Core roadmap: 15-day MVP plan
-Current Git checkpoint: 61f5f34
+Current Git checkpoint: f40b937
 
 ---
 
@@ -81,6 +81,7 @@ Routes:
 - /
 - /ece
 - /ece/[slug]
+- /ece/compare
 
 Frontend validation:
 
@@ -89,8 +90,9 @@ Frontend validation:
 
 Current frontend data state:
 
-- ECE UI still uses mock/frontend data
-- Day 5 will replace mock listing/detail data with the real FastAPI ECE API
+- ECE listing/detail pages use the real FastAPI API
+- Auckland discovery now includes official Ministry of Education ECE data
+- unknown age ranges remain explicitly unknown rather than fabricated
 
 ---
 
@@ -561,19 +563,56 @@ Day 4–8
 - accessible button states and status messaging
 - development origins moved to environment configuration
 
-### Day 8
+### Day 8 — COMPLETE
 
-- product flow polish
-- mobile/responsive QA
-- loading/error/empty states
+- mobile ECE discovery QA
+- collapsible mobile filter panel
+- improved comparison controls
+- improved sticky comparison bar
+- loading skeleton aligned with real page layout
+- empty-result state verified
+- backend-unavailable error state verified
+- responsive comparison flow verified
+- accessibility status messaging retained
 
 ## Segment 3 — Data, Automation and AI
 Day 9–11
 
-- NZ government education data integration
-- n8n automation
-- scheduled data sync
-- data quality workflows
+### Day 9 — COMPLETE
+
+- integrated official Ministry of Education ECE directory data
+- official dataset schema inspected before ingestion
+- Ministry API pagination implemented
+- data normalization and validation implemented
+- Auckland Region filtering implemented
+- 1,414 official Auckland ECE services imported
+- deterministic provider-based slugs
+- unique provider-code based PostgreSQL UPSERT
+- transactional database import
+- dry-run mode with zero database writes
+- dedicated kiwikids_ingest LOGIN role
+- ingestion role restricted to SELECT, INSERT and UPDATE
+- DELETE and TRUNCATE explicitly denied
+- ingestion database secret stored outside Git
+- non-root ingestion container
+- Ministry unknown age ranges represented as NULL
+- frontend handles unknown age ranges safely
+- Alembic migration 1ac48bf1617e applied
+- Ministry integration automated tests added
+- backend tests passing
+- frontend lint and production build passing
+
+### Day 10 — NEXT
+
+- self-hosted n8n foundation
+- scheduled Ministry data synchronization
+- ingestion workflow orchestration
+- data-quality validation
+- failure/retry handling
+- sync observability and audit trail
+
+### Day 11
+
 - recommendation scoring
 - preference matching
 - explainability
@@ -651,8 +690,8 @@ Posts should explain:
 
 # Exact Next Step
 
-Start Day 8.
+Start Day 10.
 
 First objective:
 
-Polish the complete ECE discovery flow with mobile/responsive QA, loading, error and empty states, accessibility review and final product-flow refinement.
+Introduce self-hosted n8n as an orchestration layer for scheduled Ministry ECE synchronization and data-quality workflows without moving core business logic out of FastAPI/Python.
