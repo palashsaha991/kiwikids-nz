@@ -42,3 +42,10 @@ class ECEServiceResponse(BaseModel):
 
     created_at: datetime
     updated_at: datetime
+
+
+class ECEServiceListResponse(BaseModel):
+    items: list[ECEServiceResponse]
+    total: int
+    limit: int
+    offset: int

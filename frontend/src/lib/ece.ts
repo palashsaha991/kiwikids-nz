@@ -29,11 +29,99 @@ export type EceService = {
   updated_at: string;
 };
 
+export type EceSortOption =
+  | "name_asc"
+  | "name_desc"
+  | "capacity_desc";
+
+export type EceSearchParams = {
+  search?: string;
+  region?: string;
+  suburb?: string;
+  service_type?: string;
+  availability_status?: EceService["availability_status"];
+  accepts_20_hours_ece?: boolean;
+  age_months?: number;
+  sort?: EceSortOption;
+  limit?: number;
+  offset?: number;
+};
+
+export type EceServiceListResponse = {
+  items: EceService[];
+  total: number;
+  limit: number;
+  offset: number;
+};
+
 const API_BASE_URL =
   process.env.KIWIKIDS_API_BASE_URL ?? "http://127.0.0.1:8000";
 
-export async function getEceServices(): Promise<EceService[]> {
-  const response = await fetch(`${API_BASE_URL}/api/v1/ece`, {
+function buildEceSearchParams(
+  params: EceSearchParams,
+): URLSearchParams {
+  const query = new URLSearchParams();
+
+  if (params.search) {
+    query.set("search", params.search);
+  }
+
+  if (params.region) {
+    query.set("region", params.region);
+  }
+
+  if (params.suburb) {
+    query.set("suburb", params.suburb);
+  }
+
+  if (params.service_type) {
+    query.set("service_type", params.service_type);
+  }
+
+  if (params.availability_status) {
+    query.set(
+      "availability_status",
+      params.availability_status,
+    );
+  }
+
+  if (params.accepts_20_hours_ece !== undefined) {
+    query.set(
+      "accepts_20_hours_ece",
+      String(params.accepts_20_hours_ece),
+    );
+  }
+
+  if (params.age_months !== undefined) {
+    query.set("age_months", String(params.age_months));
+  }
+
+  if (params.sort) {
+    query.set("sort", params.sort);
+  }
+
+  if (params.limit !== undefined) {
+    query.set("limit", String(params.limit));
+  }
+
+  if (params.offset !== undefined) {
+    query.set("offset", String(params.offset));
+  }
+
+  return query;
+}
+
+export async function getEceServices(
+  params: EceSearchParams = {},
+): Promise<EceServiceListResponse> {
+  const query = buildEceSearchParams(params);
+
+  const url =
+    query.size > 0
+      ? `${API_BASE_URL}/api/v1/ece?${query.toString()}`
+      : `${API_BASE_URL}/api/v1/ece`;
+
+  const response = await fetch(url, {
     cache: "no-store",
     headers: {
       Accept: "application/json",
@@ -46,7 +134,7 @@ export async function getEceServices(): Promise<EceService[]> {
     );
   }
 
-  return response.json() as Promise<EceService[]>;
+  return response.json() as Promise<EceServiceListResponse>;
 }
 
 export async function getEceServiceBySlug(
