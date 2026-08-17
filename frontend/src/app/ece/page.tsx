@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { CompareBar } from "@/components/ece/CompareBar";
+import { FilterPanel } from "@/components/ece/FilterPanel";
 import { ServiceCard } from "@/components/ece/ServiceCard";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import {
@@ -375,7 +376,8 @@ export default async function EcePage({
       </section>
 
       <section className="container-shell grid gap-8 py-10 lg:grid-cols-[300px_1fr]">
-        <aside className="h-fit rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <FilterPanel>
+          <aside className="h-fit rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between gap-4">
             <h2 className="text-lg font-bold">
               Filters
@@ -569,7 +571,8 @@ export default async function EcePage({
               Apply filters
             </button>
           </form>
-        </aside>
+          </aside>
+        </FilterPanel>
 
         <div>
           <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">

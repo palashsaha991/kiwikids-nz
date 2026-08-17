@@ -74,29 +74,49 @@ export function CompareControls({
 
 
   return (
-    <div className="flex flex-wrap items-center gap-3">
-      {services.map(
-        (service) => (
-          <button
-            key={service.slug}
-            type="button"
-            onClick={() =>
-              handleRemove(
-                service.slug,
-              )
-            }
-            aria-label={`Remove ${service.name} from comparison`}
-            className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-red-200 hover:bg-red-50 hover:text-red-700"
-          >
-            Remove {service.name}
-          </button>
-        ),
-      )}
+    <div>
+      <p className="text-sm font-semibold text-slate-700">
+        {services.length}{" "}
+        {services.length === 1
+          ? "service"
+          : "services"}{" "}
+        selected
+      </p>
+
+      <div className="mt-3 flex flex-wrap gap-2">
+        {services.map(
+          (service) => (
+            <button
+              key={service.slug}
+              type="button"
+              onClick={() =>
+                handleRemove(
+                  service.slug,
+                )
+              }
+              aria-label={`Remove ${service.name} from comparison`}
+              title={`Remove ${service.name}`}
+              className="inline-flex max-w-full items-center gap-2 rounded-full border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:border-red-200 hover:bg-red-50 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:ring-offset-2"
+            >
+              <span className="max-w-[220px] truncate sm:max-w-[320px]">
+                {service.name}
+              </span>
+
+              <span
+                aria-hidden="true"
+                className="text-base leading-none"
+              >
+                ×
+              </span>
+            </button>
+          ),
+        )}
+      </div>
 
       <button
         type="button"
         onClick={handleClear}
-        className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100"
+        className="mt-4 text-sm font-semibold text-red-700 underline-offset-4 transition hover:underline focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2"
       >
         Clear comparison
       </button>
