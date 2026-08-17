@@ -2,9 +2,9 @@
 
 ## Current Status
 
-Current phase: Day 4 COMPLETE — ready for Day 5  
-Core roadmap: 15-day MVP plan  
-Current Git checkpoint: 0dcdfb5
+Current phase: Day 6 COMPLETE — ready for Day 7
+Core roadmap: 15-day MVP plan
+Current Git checkpoint: 61f5f34
 
 ---
 
@@ -523,21 +523,29 @@ Day 4–8
 - first migration
 - initial ECE API
 
-### Day 5 — NEXT
+### Day 5 — COMPLETE
 
-- strengthen ECE listing/detail APIs as needed for the UI
-- connect Next.js /ece to real FastAPI data
-- connect /ece/[slug] to real FastAPI detail data
-- remove frontend mock ECE data from the live product path
-- preserve loading/error/empty handling foundation
+- connected Next.js /ece to real FastAPI data
+- connected /ece/[slug] to real FastAPI detail data
+- removed mock ECE data from the live product path
+- added loading state
+- added custom not-found state
+- retained API failure and empty-result handling
 
-### Day 6
+### Day 6 — COMPLETE
 
-- search
-- filters
-- sorting
-- pagination
-- location model
+- database-backed text search
+- service type filtering
+- availability filtering
+- 20 Hours ECE filtering
+- child-age matching
+- sorting by name and capacity
+- paginated API contract with items, total, limit and offset
+- URL-driven shareable frontend filters
+- Previous / Next pagination
+- Showing X-Y of Z result state
+- invalid and out-of-range page normalization
+- filter state preserved during sorting and pagination
 
 ### Day 7
 
@@ -636,8 +644,8 @@ Posts should explain:
 
 # Exact Next Step
 
-Start Day 5.
+Start Day 7.
 
 First objective:
 
-Connect the existing Next.js ECE listing page to GET /api/v1/ece so the browser displays real PostgreSQL-backed service records instead of frontend mock data.
+Add favourites and compare foundations while preserving server-rendered discovery, validation, accessibility and secure data handling.
