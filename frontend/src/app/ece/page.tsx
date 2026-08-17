@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { CompareBar } from "@/components/ece/CompareBar";
 import { ServiceCard } from "@/components/ece/ServiceCard";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import {
@@ -785,6 +786,8 @@ export default async function EcePage({
           )}
         </div>
       </section>
+
+      <CompareBar />
     </main>
   );
 }
