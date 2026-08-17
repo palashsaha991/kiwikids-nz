@@ -14,6 +14,7 @@ services:
       - postgres_password
       - runtime_db_password
       - migration_db_password
+      - ingest_db_password
 
     volumes:
       - /srv/postgresql/data:/var/lib/postgresql/data
@@ -100,6 +101,48 @@ services:
       - tools
 
 
+  ingest:
+    build:
+      context: ../..
+      dockerfile: backend/Dockerfile
+
+    container_name: kiwikids-ingest
+    working_dir: /app
+
+    command:
+      - python
+      - -m
+      - app.integrations.moe_ece_import
+
+    environment:
+      PYTHONPATH: /app
+      KIWIKIDS_INGEST_DB_HOST: postgres
+      KIWIKIDS_INGEST_DB_PORT: "5432"
+      KIWIKIDS_INGEST_DB_NAME: kiwikids
+      KIWIKIDS_INGEST_DB_USER: kiwikids_ingest
+      KIWIKIDS_INGEST_DB_PASSWORD_FILE: /run/secrets/ingest_db_password
+
+    secrets:
+      - ingest_db_password
+
+    networks:
+      - app
+      - data
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    security_opt:
+      - no-new-privileges:true
+
+    group_add:
+      - "1002"
+
+    profiles:
+      - tools
+
+
 secrets:
   postgres_password:
     file: /srv/kiwikids-secrets/postgres_password
@@ -109,6 +152,9 @@ secrets:
 
   migration_db_password:
     file: /srv/kiwikids-secrets/migration_db_password
+
+  ingest_db_password:
+    file: /srv/kiwikids-secrets/ingest_db_password
 
 
 networks:

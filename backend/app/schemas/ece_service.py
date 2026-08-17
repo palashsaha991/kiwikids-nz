@@ -27,8 +27,8 @@ class ECEServiceResponse(BaseModel):
     latitude: Decimal | None
     longitude: Decimal | None
 
-    minimum_age_months: int
-    maximum_age_months: int
+    minimum_age_months: int | None
+    maximum_age_months: int | None
     licensed_places: int | None
 
     accepts_20_hours_ece: bool | None

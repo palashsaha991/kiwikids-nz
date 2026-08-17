@@ -161,14 +161,14 @@ class ECEService(Base):
         nullable=True,
     )
 
-    minimum_age_months: Mapped[int] = mapped_column(
+    minimum_age_months: Mapped[int | None] = mapped_column(
         Integer,
-        nullable=False,
+        nullable=True,
     )
 
-    maximum_age_months: Mapped[int] = mapped_column(
+    maximum_age_months: Mapped[int | None] = mapped_column(
         Integer,
-        nullable=False,
+        nullable=True,
     )
 
     licensed_places: Mapped[int | None] = mapped_column(

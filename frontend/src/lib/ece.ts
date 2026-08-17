@@ -12,8 +12,8 @@ export type EceService = {
   postcode: string | null;
   latitude: string | null;
   longitude: string | null;
-  minimum_age_months: number;
-  maximum_age_months: number;
+  minimum_age_months: number | null;
+  maximum_age_months: number | null;
   licensed_places: number | null;
   accepts_20_hours_ece: boolean | null;
   availability_status:
@@ -164,9 +164,16 @@ export async function getEceServiceBySlug(
 }
 
 export function formatAgeRange(
-  minimumMonths: number,
-  maximumMonths: number,
+  minimumMonths: number | null,
+  maximumMonths: number | null,
 ): string {
+  if (
+    minimumMonths === null ||
+    maximumMonths === null
+  ) {
+    return "Age range to confirm";
+  }
+
   const formatAge = (months: number): string => {
     if (months === 0) {
       return "Birth";
