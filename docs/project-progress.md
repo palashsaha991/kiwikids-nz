@@ -2,7 +2,7 @@
 
 ## Current Status
 
-Current phase: Day 6 COMPLETE — ready for Day 7
+Current phase: Day 7 COMPLETE — ready for Day 8
 Core roadmap: 15-day MVP plan
 Current Git checkpoint: 61f5f34
 
@@ -547,12 +547,19 @@ Day 4–8
 - invalid and out-of-range page normalization
 - filter state preserved during sorting and pagination
 
-### Day 7
+### Day 7 — COMPLETE
 
-- favourites
-- compare
-- validation
-- UX states
+- persistent ECE favourites using local browser storage
+- persistent compare selection using local browser storage
+- compare limit of three services
+- sticky comparison bar
+- dedicated /ece/compare page
+- side-by-side comparison of location, age range, capacity, funding and availability
+- remove individual services from comparison
+- clear comparison flow
+- stale or invalid comparison entries handled safely
+- accessible button states and status messaging
+- development origins moved to environment configuration
 
 ### Day 8
 
@@ -644,8 +651,8 @@ Posts should explain:
 
 # Exact Next Step
 
-Start Day 7.
+Start Day 8.
 
 First objective:
 
-Add favourites and compare foundations while preserving server-rendered discovery, validation, accessibility and secure data handling.
+Polish the complete ECE discovery flow with mobile/responsive QA, loading, error and empty states, accessibility review and final product-flow refinement.
