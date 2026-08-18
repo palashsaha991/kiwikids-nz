@@ -143,6 +143,111 @@ services:
       - tools
 
 
+  sync-runner:
+    build:
+      context: ../..
+      dockerfile: backend/Dockerfile
+
+    container_name: kiwikids-sync-runner
+    restart: unless-stopped
+    working_dir: /app
+
+    command:
+      - uvicorn
+      - app.sync_runner:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8081"
+      - --workers
+      - "1"
+
+    environment:
+      PYTHONPATH: /app
+      PYTHONDONTWRITEBYTECODE: "1"
+
+      KIWIKIDS_INGEST_DB_HOST: postgres
+      KIWIKIDS_INGEST_DB_PORT: "5432"
+      KIWIKIDS_INGEST_DB_NAME: kiwikids
+      KIWIKIDS_INGEST_DB_USER: kiwikids_ingest
+      KIWIKIDS_INGEST_DB_PASSWORD_FILE: /run/secrets/ingest_db_password
+
+      KIWIKIDS_SYNC_TOKEN_FILE: /run/secrets/sync_runner_token
+
+      KIWIKIDS_ECE_MIN_EXPECTED_SERVICES: "1000"
+      KIWIKIDS_ECE_MAX_EXPECTED_SERVICES: "3000"
+
+    secrets:
+      - ingest_db_password
+      - sync_runner_token
+
+    networks:
+      - app
+      - data
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    security_opt:
+      - no-new-privileges:true
+
+    cap_drop:
+      - ALL
+
+    read_only: true
+
+    tmpfs:
+      - /tmp:size=16m,noexec,nosuid,nodev
+
+    group_add:
+      - "1002"
+
+
+  n8n:
+    image: n8nio/n8n:2.34.6
+    container_name: kiwikids-n8n
+    restart: unless-stopped
+
+    environment:
+      N8N_HOST: 127.0.0.1
+      N8N_PORT: "5678"
+      N8N_PROTOCOL: http
+
+      N8N_ENCRYPTION_KEY_FILE: /run/secrets/n8n_encryption_key
+
+      N8N_DIAGNOSTICS_ENABLED: "false"
+      N8N_PERSONALIZATION_ENABLED: "false"
+
+      N8N_UNVERIFIED_PACKAGES_ENABLED: "false"
+      N8N_RUNNERS_TASK_TIMEOUT: "60"
+      N8N_COMPRESSION_NODE_MAX_DECOMPRESSED_SIZE_BYTES: "268435456"
+      N8N_COMPRESSION_NODE_MAX_ZIP_ENTRIES: "1000"
+
+      N8N_SECURE_COOKIE: "false"
+
+      GENERIC_TIMEZONE: Pacific/Auckland
+      TZ: Pacific/Auckland
+
+    secrets:
+      - n8n_encryption_key
+
+    volumes:
+      - /srv/n8n/data:/home/node/.n8n
+
+    networks:
+      - app
+
+    ports:
+      - "127.0.0.1:5678:5678"
+
+    security_opt:
+      - no-new-privileges:true
+
+    group_add:
+      - "1002"
+
+
 secrets:
   postgres_password:
     file: /srv/kiwikids-secrets/postgres_password
@@ -155,6 +260,12 @@ secrets:
 
   ingest_db_password:
     file: /srv/kiwikids-secrets/ingest_db_password
+
+  n8n_encryption_key:
+    file: /srv/kiwikids-secrets/n8n_encryption_key
+
+  sync_runner_token:
+    file: /srv/kiwikids-secrets/sync_runner_token
 
 
 networks:

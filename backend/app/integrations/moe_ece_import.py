@@ -265,11 +265,11 @@ def import_services(
 
     try:
         with engine.begin() as connection:
-            result = connection.execute(
+            connection.execute(
                 statement
             )
 
-            return result.rowcount
+            return len(rows)
     finally:
         engine.dispose()
 

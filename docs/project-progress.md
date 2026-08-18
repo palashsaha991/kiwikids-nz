@@ -602,16 +602,32 @@ Day 9–11
 - backend tests passing
 - frontend lint and production build passing
 
-### Day 10 — NEXT
+### Day 10 — COMPLETE
 
-- self-hosted n8n foundation
-- scheduled Ministry data synchronization
-- ingestion workflow orchestration
-- data-quality validation
-- failure/retry handling
-- sync observability and audit trail
+- self-hosted n8n 2.34.6 deployed locally
+- n8n bound to host loopback only
+- SSH tunnel used for secure browser access
+- dedicated n8n encryption key stored outside Git
+- unverified community packages disabled
+- secure internal sync-runner service added
+- sync-runner has no published host port
+- sync-runner uses dedicated kiwikids_ingest database role
+- token-authenticated internal sync endpoint implemented
+- concurrent ECE sync protection implemented
+- Ministry ECE synchronization orchestrated through n8n
+- nightly 02:30 Pacific/Auckland Schedule Trigger configured
+- manual trigger retained for controlled testing
+- HTTP Request credential stored through n8n credential management
+- ECE service-count data-quality gate implemented before database writes
+- successful synchronization verified with 1,414 Auckland ECE services
+- reliable processed-row count returned after successful UPSERT
+- IF-based success and failure workflow branches implemented
+- dedicated n8n Error Trigger workflow implemented and linked
+- controlled scheduled failure test successfully triggered error workflow
+- n8n execution history provides initial workflow audit/diagnostic visibility
+- backend sync-runner automated tests added
 
-### Day 11
+### Day 11 — NEXT
 
 - recommendation scoring
 - preference matching
@@ -690,8 +706,8 @@ Posts should explain:
 
 # Exact Next Step
 
-Start Day 10.
+Start Day 11.
 
 First objective:
 
-Introduce self-hosted n8n as an orchestration layer for scheduled Ministry ECE synchronization and data-quality workflows without moving core business logic out of FastAPI/Python.
+Implement explainable ECE recommendation scoring and preference matching using real Auckland Ministry ECE data while keeping recommendation logic deterministic, testable and transparent.
