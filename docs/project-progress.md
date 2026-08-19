@@ -627,12 +627,46 @@ Day 9–11
 - n8n execution history provides initial workflow audit/diagnostic visibility
 - backend sync-runner automated tests added
 
-### Day 11 — NEXT
+### Day 11 — COMPLETE
 
-- recommendation scoring
-- preference matching
-- explainability
-- analytics foundation
+- deterministic explainable ECE recommendation engine implemented
+- recommendation scores normalised against applicable preferences
+- suburb preference scoring implemented
+- 20 Hours ECE preference scoring implemented
+- service-type preference scoring implemented
+- minimum licensed-capacity preference scoring implemented
+- data-completeness scoring implemented
+- unknown Ministry data handled explicitly without fabricated values
+- canonical Ministry ECE service-type mapping implemented
+- friendly service-type aliases supported
+- Haversine distance calculation implemented
+- distance-aware recommendation scoring implemented
+- precise location and suburb scoring protected from double-counting
+- browser current-location permission flow implemented
+- manual latitude and longitude entry removed from normal user experience
+- suburb matching retained as fallback when location is unavailable
+- recommendation API endpoint added
+- full Auckland recommendation pool of 1,414 active ECE services ranked
+- transparent per-factor match explanations returned by API
+- responsive recommendation page implemented
+- match percentage and explainability UI implemented
+- current-location based ranking verified in production-mode frontend
+- recommendation automated tests added
+- backend test suite passing with 18 tests
+- frontend lint passing
+- frontend production build passing
+
+### Day 12 — NEXT
+
+- GitHub Actions CI
+- backend automated test workflow
+- frontend lint and production build workflow
+- secret scanning
+- dependency vulnerability scanning
+- SAST
+- Docker image build
+- container vulnerability scanning
+- SBOM generation
 
 ## Segment 4 — DevSecOps, Cloud and Launch
 Day 12–15
@@ -706,8 +740,8 @@ Posts should explain:
 
 # Exact Next Step
 
-Start Day 11.
+Start Day 12.
 
 First objective:
 
-Implement explainable ECE recommendation scoring and preference matching using real Auckland Ministry ECE data while keeping recommendation logic deterministic, testable and transparent.
+Implement a GitHub Actions based CI pipeline for backend tests, frontend lint/build, security scanning, container validation and software supply-chain checks before introducing automated deployment.

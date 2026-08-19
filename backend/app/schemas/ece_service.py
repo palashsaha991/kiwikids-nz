@@ -49,3 +49,24 @@ class ECEServiceListResponse(BaseModel):
     total: int
     limit: int
     offset: int
+
+
+class ECERecommendationReasonResponse(BaseModel):
+    factor: str
+    matched: bool | None
+    points_earned: int
+    points_available: int
+    explanation: str
+
+
+class ECERecommendationItemResponse(BaseModel):
+    service: ECEServiceResponse
+    match_score: int
+    points_earned: int
+    points_available: int
+    reasons: list[ECERecommendationReasonResponse]
+
+
+class ECERecommendationListResponse(BaseModel):
+    items: list[ECERecommendationItemResponse]
+    total: int

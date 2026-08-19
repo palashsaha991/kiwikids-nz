@@ -8,8 +8,12 @@ from app.repositories.ece_service import (
     count_ece_services,
     get_ece_service_by_slug,
     list_ece_services,
+    list_recommendation_candidates,
 )
 from app.schemas.ece_service import (
+    ECERecommendationItemResponse,
+    ECERecommendationListResponse,
+    ECERecommendationReasonResponse,
     ECEServiceListResponse,
     ECEServiceResponse,
 )
@@ -37,6 +41,12 @@ SortOption = Literal[
     "name_desc",
     "capacity_desc",
 ]
+
+
+from app.services.ece_recommendation import (
+    RecommendationPreferences,
+    score_ece_service,
+)
 
 
 @router.get(
@@ -127,6 +137,131 @@ def get_ece_services(
         total=total,
         limit=limit,
         offset=offset,
+    )
+
+
+
+@router.get(
+    "/recommendations",
+    response_model=ECERecommendationListResponse,
+)
+def get_ece_recommendations(
+    session: DatabaseSession,
+    suburb: Annotated[
+        str | None,
+        Query(
+            min_length=1,
+            max_length=120,
+        ),
+    ] = None,
+    service_type: Annotated[
+        str | None,
+        Query(
+            min_length=1,
+            max_length=80,
+        ),
+    ] = None,
+    wants_20_hours_ece: bool | None = None,
+    minimum_capacity: Annotated[
+        int | None,
+        Query(
+            ge=1,
+            le=1000,
+        ),
+    ] = None,
+    latitude: Annotated[
+        float | None,
+        Query(
+            ge=-90,
+            le=90,
+        ),
+    ] = None,
+    longitude: Annotated[
+        float | None,
+        Query(
+            ge=-180,
+            le=180,
+        ),
+    ] = None,
+    limit: Annotated[
+        int,
+        Query(
+            ge=1,
+            le=50,
+        ),
+    ] = 10,
+) -> ECERecommendationListResponse:
+    if (
+        (latitude is None)
+        != (longitude is None)
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=(
+                "latitude and longitude must "
+                "be supplied together."
+            ),
+        )
+
+    preferences = RecommendationPreferences(
+        suburb=suburb,
+        service_type=service_type,
+        wants_20_hours_ece=wants_20_hours_ece,
+        minimum_capacity=minimum_capacity,
+        latitude=latitude,
+        longitude=longitude,
+    )
+
+    candidates = list_recommendation_candidates(
+        session,
+        region="Auckland Region",
+    )
+
+    scored = []
+
+    for service in candidates:
+        score = score_ece_service(
+            service,
+            preferences,
+        )
+
+        scored.append(
+            (
+                service,
+                score,
+            )
+        )
+
+    scored.sort(
+        key=lambda item: (
+            -item[1].match_score,
+            item[0].name.casefold(),
+        )
+    )
+
+    items = [
+        ECERecommendationItemResponse(
+            service=service,
+            match_score=score.match_score,
+            points_earned=score.points_earned,
+            points_available=score.points_available,
+            reasons=[
+                ECERecommendationReasonResponse(
+                    factor=reason.factor,
+                    matched=reason.matched,
+                    points_earned=reason.points_earned,
+                    points_available=reason.points_available,
+                    explanation=reason.explanation,
+                )
+                for reason in score.reasons
+            ],
+        )
+        for service, score in scored[:limit]
+    ]
+
+    return ECERecommendationListResponse(
+        items=items,
+        total=len(scored),
     )
 
 

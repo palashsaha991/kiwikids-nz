@@ -182,3 +182,24 @@ def get_ece_service_by_slug(
     )
 
     return session.scalar(statement)
+
+
+def list_recommendation_candidates(
+    session: Session,
+    *,
+    region: str = "Auckland Region",
+) -> list[ECEService]:
+    statement = (
+        select(ECEService)
+        .where(
+            ECEService.is_active.is_(True),
+            ECEService.region.ilike(region.strip()),
+        )
+        .order_by(
+            ECEService.name.asc()
+        )
+    )
+
+    return list(
+        session.scalars(statement).all()
+    )
