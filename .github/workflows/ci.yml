@@ -44,7 +44,7 @@ jobs:
           pip install -r requirements.lock.txt
 
       - name: Run backend tests
-        run: pytest -q
+        run: python -m pytest -q
 
   frontend:
     name: Frontend Lint and Build
