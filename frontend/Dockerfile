@@ -1,6 +1,4 @@
-# syntax=docker/dockerfile:1
-
-FROM node:24-alpine AS deps
+FROM node:24-alpine@sha256:e67514e5d0f6c46656005e1b693b2ec9d52e80b641307de684d4a015ba7a4eaf AS deps
 
 WORKDIR /app
 
@@ -9,7 +7,7 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 
-FROM node:24-alpine AS builder
+FROM node:24-alpine@sha256:e67514e5d0f6c46656005e1b693b2ec9d52e80b641307de684d4a015ba7a4eaf AS builder
 
 WORKDIR /app
 
@@ -21,7 +19,7 @@ COPY . .
 RUN npm run build
 
 
-FROM node:24-alpine AS runner
+FROM node:24-alpine@sha256:e67514e5d0f6c46656005e1b693b2ec9d52e80b641307de684d4a015ba7a4eaf AS runner
 
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
