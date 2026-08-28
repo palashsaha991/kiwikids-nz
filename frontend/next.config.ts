@@ -7,6 +7,7 @@ const configuredOrigins =
     .filter(Boolean) ?? [];
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   allowedDevOrigins: configuredOrigins,
 };
 

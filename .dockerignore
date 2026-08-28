@@ -1,0 +1,17 @@
+.git
+.github
+
+frontend/node_modules
+frontend/.next
+
+backend/.venv
+backend/__pycache__
+backend/.pytest_cache
+backend/tests
+
+.env
+.env.*
+!.env.example
+
+*.log
+.DS_Store

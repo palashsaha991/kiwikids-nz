@@ -123,3 +123,63 @@ jobs:
 
       - name: Audit Node dependencies
         run: npm audit --audit-level=high
+
+  container-security:
+    name: Container Security - ${{ matrix.component }}
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - component: backend
+            dockerfile: backend/Dockerfile
+            context: .
+          - component: frontend
+            dockerfile: frontend/Dockerfile
+            context: frontend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+
+      - name: Build production image
+        run: |
+          docker build \
+            --file "${{ matrix.dockerfile }}" \
+            --tag "kiwikids-${{ matrix.component }}:${{ github.sha }}" \
+            "${{ matrix.context }}"
+
+      - name: Scan image for HIGH and CRITICAL vulnerabilities
+        uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
+        with:
+          scan-type: image
+          image-ref: "kiwikids-${{ matrix.component }}:${{ github.sha }}"
+          format: table
+          vuln-type: os,library
+          severity: HIGH,CRITICAL
+          ignore-unfixed: false
+          exit-code: "1"
+
+      - name: Generate CycloneDX SBOM
+        uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
+        with:
+          scan-type: image
+          image-ref: "kiwikids-${{ matrix.component }}:${{ github.sha }}"
+          format: cyclonedx
+          output: "sbom-${{ matrix.component }}.cdx.json"
+          exit-code: "0"
+          skip-setup-trivy: true
+
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: "sbom-${{ matrix.component }}-${{ github.sha }}"
+          path: "sbom-${{ matrix.component }}.cdx.json"
+          if-no-files-found: error
+          retention-days: 30
