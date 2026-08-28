@@ -1,6 +1,4 @@
-# syntax=docker/dockerfile:1
-
-FROM python:3.14-slim
+FROM python:3.14-alpine
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -9,26 +7,21 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
+# Patch Alpine base packages
+RUN apk upgrade --no-cache
 
-RUN apt-get update \
-    && apt-get upgrade -y \
-    && rm -rf /var/lib/apt/lists/*
+# Dedicated non-root runtime user
+RUN addgroup -S -g 10001 appgroup \
+    && adduser -S -D -H -u 10001 -G appgroup appuser
 
-RUN groupadd --system --gid 10001 appgroup \
-    && useradd \
-        --system \
-        --uid 10001 \
-        --gid appgroup \
-        --home-dir /nonexistent \
-        --shell /usr/sbin/nologin \
-        appuser
-
+# Install only production/runtime Python dependencies
 COPY backend/requirements.runtime.txt ./requirements.runtime.txt
 
 RUN python -m pip install \
     --no-cache-dir \
     --requirement requirements.runtime.txt
 
+# Application files
 COPY --chown=10001:10001 backend/app ./app
 COPY --chown=10001:10001 backend/alembic.ini ./alembic.ini
 COPY --chown=10001:10001 backend/migrations ./migrations
