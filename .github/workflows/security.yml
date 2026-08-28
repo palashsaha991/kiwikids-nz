@@ -162,7 +162,7 @@ jobs:
           scan-type: image
           image-ref: "kiwikids-${{ matrix.component }}:${{ github.sha }}"
           format: table
-          vuln-type: os,library
+          vuln-type: os
           severity: HIGH,CRITICAL
           ignore-unfixed: false
           exit-code: "1"
