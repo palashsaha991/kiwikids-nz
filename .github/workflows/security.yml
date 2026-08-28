@@ -158,6 +158,7 @@ jobs:
       - name: Scan image for HIGH and CRITICAL vulnerabilities
         uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
         with:
+          version: v0.74.0
           scan-type: image
           image-ref: "kiwikids-${{ matrix.component }}:${{ github.sha }}"
           format: table
@@ -169,6 +170,7 @@ jobs:
       - name: Generate CycloneDX SBOM
         uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
         with:
+          version: v0.74.0
           scan-type: image
           image-ref: "kiwikids-${{ matrix.component }}:${{ github.sha }}"
           format: cyclonedx
