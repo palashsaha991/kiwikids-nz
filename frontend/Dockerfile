@@ -31,7 +31,10 @@ ENV NODE_ENV=production \
 WORKDIR /app
 
 RUN addgroup --system --gid 10001 nextjs \
-    && adduser --system --uid 10001 --ingroup nextjs nextjs
+    && adduser --system --uid 10001 --ingroup nextjs nextjs \
+    && rm -rf /usr/local/lib/node_modules/npm \
+              /usr/local/lib/node_modules/corepack \
+              /opt/yarn*
 
 COPY --from=builder --chown=10001:10001 /app/public ./public
 COPY --from=builder --chown=10001:10001 /app/.next/standalone ./
