@@ -30,6 +30,8 @@ ENV NODE_ENV=production \
 
 WORKDIR /app
 
+RUN apk upgrade --no-cache
+
 RUN addgroup --system --gid 10001 nextjs \
     && adduser --system --uid 10001 --ingroup nextjs nextjs \
     && rm -rf /usr/local/lib/node_modules/npm \
