@@ -266,3 +266,40 @@ export type EceRecommendationListResponse = {
   total: number;
 };
 
+
+
+export async function getEceServicesForMap(): Promise<EceService[]> {
+  const pageSize = 100;
+  const services: EceService[] = [];
+
+  let offset = 0;
+  let total = Number.POSITIVE_INFINITY;
+
+  while (
+    offset < total &&
+    offset < 2000
+  ) {
+    const result = await getEceServices({
+      limit: pageSize,
+      offset,
+      sort: "name_asc",
+    });
+
+    services.push(
+      ...result.items.filter(
+        (service) =>
+          service.latitude !== null &&
+          service.longitude !== null,
+      ),
+    );
+
+    total = result.total;
+    offset += pageSize;
+
+    if (result.items.length === 0) {
+      break;
+    }
+  }
+
+  return services;
+}
