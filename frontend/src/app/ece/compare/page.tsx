@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { CompareControls } from "@/components/ece/CompareControls";
+import { CompareHydrator } from "@/components/ece/CompareHydrator";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import {
   formatAgeRange,
@@ -73,6 +74,8 @@ export default async function ComparePage({
               Select up to three early childhood education services before
               opening the comparison page.
             </p>
+
+            <CompareHydrator />
 
             <Link
               href="/ece"

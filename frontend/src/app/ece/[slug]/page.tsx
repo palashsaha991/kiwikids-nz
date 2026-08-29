@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { ServiceActions } from "@/components/ece/ServiceActions";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import {
   formatAgeRange,
@@ -141,12 +142,10 @@ export default async function EceDetailPage({
                   </p>
                 </div>
 
-                <button
-                  type="button"
-                  className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold transition hover:bg-slate-50"
-                >
-                  Save
-                </button>
+                <ServiceActions
+                  slug={service.slug}
+                  mode="save-only"
+                />
               </div>
 
               <div className="mt-8 grid gap-4 sm:grid-cols-3">
@@ -335,19 +334,9 @@ export default async function EceDetailPage({
               </p>
 
               <div className="mt-6 space-y-3">
-                <button
-                  type="button"
-                  className="w-full rounded-xl bg-emerald-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-800"
-                >
-                  Add to shortlist
-                </button>
-
-                <button
-                  type="button"
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold transition hover:bg-slate-50"
-                >
-                  Add to compare
-                </button>
+                <ServiceActions
+                  slug={service.slug}
+                />
 
                 <Link
                   href="/ece"
