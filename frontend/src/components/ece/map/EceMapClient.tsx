@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   useEffect,
   useMemo,
@@ -98,6 +99,7 @@ function MapController({
 export function EceMapClient({
   services,
 }: Props) {
+  const searchParams = useSearchParams();
   const [search, setSearch] =
     useState("");
 
@@ -117,6 +119,24 @@ export function EceMapClient({
   ] = useState<EceService | null>(
     null,
   );
+
+  useEffect(() => {
+    const requestedSlug =
+      searchParams.get("service");
+
+    if (!requestedSlug) {
+      return;
+    }
+
+    const matched = services.find(
+      (service) =>
+        service.slug === requestedSlug,
+    );
+
+    if (matched) {
+      setSelectedService(matched);
+    }
+  }, [searchParams, services]);
 
   const mappedServices = useMemo(
     () =>
