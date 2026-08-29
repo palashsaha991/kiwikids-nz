@@ -102,6 +102,28 @@ def _normalise_text(value: str | None) -> str | None:
     return cleaned.casefold()
 
 
+def _normalise_suburb(
+    value: str | None,
+) -> str | None:
+    cleaned = _normalise_text(value)
+
+    if cleaned is None:
+        return None
+
+    if cleaned.startswith("mt "):
+        cleaned = (
+            "mount "
+            + cleaned[3:]
+        )
+
+    if cleaned.endswith("-auckland"):
+        cleaned = cleaned[
+            :-len("-auckland")
+        ]
+
+    return cleaned
+
+
 def _score_data_completeness(
     service: ECEService,
 ) -> tuple[int, RecommendationReason]:
@@ -198,7 +220,7 @@ def score_ece_service(
             )
         )
 
-    preferred_suburb = _normalise_text(
+    preferred_suburb = _normalise_suburb(
         preferences.suburb
     )
 
@@ -213,7 +235,7 @@ def score_ece_service(
     ):
         available += LOCATION_WEIGHT
 
-        service_suburb = _normalise_text(
+        service_suburb = _normalise_suburb(
             service.suburb
         )
 

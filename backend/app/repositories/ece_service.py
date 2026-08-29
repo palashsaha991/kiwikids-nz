@@ -71,13 +71,23 @@ def _build_filters(
         )
 
     if age_months is not None:
-        conditions.extend(
-            [
-                ECEService.minimum_age_months
-                <= age_months,
-                ECEService.maximum_age_months
-                >= age_months,
-            ]
+        conditions.append(
+            or_(
+                (
+                    ECEService.minimum_age_months
+                    <= age_months
+                )
+                & (
+                    ECEService.maximum_age_months
+                    >= age_months
+                ),
+                ECEService.minimum_age_months.is_(
+                    None
+                ),
+                ECEService.maximum_age_months.is_(
+                    None
+                ),
+            )
         )
 
     return conditions
@@ -203,3 +213,63 @@ def list_recommendation_candidates(
     return list(
         session.scalars(statement).all()
     )
+
+
+def list_ece_location_facets(
+    session: Session,
+) -> list[dict]:
+    statement = (
+        select(
+            ECEService.city,
+            ECEService.suburb,
+            func.count(ECEService.id),
+        )
+        .where(
+            ECEService.is_active.is_(True),
+            ECEService.city.is_not(None),
+        )
+        .group_by(
+            ECEService.city,
+            ECEService.suburb,
+        )
+        .order_by(
+            ECEService.city.asc(),
+            ECEService.suburb.asc(),
+        )
+    )
+
+    rows = session.execute(
+        statement
+    ).all()
+
+    areas: dict[str, dict] = {}
+
+    for city, suburb, count in rows:
+        if not city:
+            continue
+
+        area = areas.setdefault(
+            city,
+            {
+                "value": city,
+                "label": city,
+                "services": 0,
+                "suburbs": [],
+            },
+        )
+
+        area["services"] += int(count)
+
+        if (
+            suburb is not None
+            and suburb.strip()
+        ):
+            area["suburbs"].append(
+                {
+                    "value": suburb.strip(),
+                    "label": suburb.strip(),
+                    "services": int(count),
+                }
+            )
+
+    return list(areas.values())

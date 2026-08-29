@@ -211,8 +211,12 @@ test.describe("KiwiKids local acceptance", () => {
     await page.goto("/ece/recommendations");
 
     await page
-      .getByLabel("Preferred suburb")
-      .fill("Onehunga");
+      .getByLabel("Area / Town")
+      .selectOption("Auckland");
+
+    await page
+      .getByLabel("Suburb")
+      .selectOption("Onehunga");
 
     await page
       .getByLabel("20 Hours ECE")
@@ -225,7 +229,7 @@ test.describe("KiwiKids local acceptance", () => {
       .click();
 
     await expect(page).toHaveURL(
-      /\/ece\/recommendations\?/,
+      /\/ece\/recommendations$/,
     );
 
     await expect(
@@ -235,14 +239,44 @@ test.describe("KiwiKids local acceptance", () => {
     await expect(
       page.getByText(/Match/i).first(),
     ).toBeVisible();
+
+    const currentUrl = page.url();
+
+    expect(currentUrl).not.toContain(
+      "latitude=",
+    );
+
+    expect(currentUrl).not.toContain(
+      "longitude=",
+    );
+
+    expect(currentUrl).not.toContain(
+      "suburb=",
+    );
   });
 
   test("recommendation result opens service detail", async ({
     page,
   }) => {
-    await page.goto(
-      "/ece/recommendations?suburb=Onehunga",
-    );
+    await page.goto("/ece/recommendations");
+
+    await page
+      .getByLabel("Area / Town")
+      .selectOption("Auckland");
+
+    await page
+      .getByLabel("Suburb")
+      .selectOption("Onehunga");
+
+    await page
+      .getByRole("button", {
+        name: "Find my matches",
+      })
+      .click();
+
+    await expect(
+      page.getByText(/Best matches/i),
+    ).toBeVisible();
 
     const detailLink =
       page.getByRole("link", {
@@ -254,6 +288,8 @@ test.describe("KiwiKids local acceptance", () => {
 
     await detailLink.click();
 
-    await expect(page).toHaveURL(/\/ece\/.+/);
+    await expect(page).toHaveURL(
+      /\/ece\/[^?]+$/,
+    );
   });
 });

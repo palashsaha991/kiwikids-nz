@@ -6,23 +6,18 @@ import { useState } from "react";
 type LocationPickerProps = {
   initialLatitude?: number;
   initialLongitude?: number;
+  onLocationChange?: (
+    latitude: number | undefined,
+    longitude: number | undefined,
+  ) => void;
 };
 
 
 export function LocationPicker({
   initialLatitude,
   initialLongitude,
+  onLocationChange,
 }: LocationPickerProps) {
-  const [latitude, setLatitude] =
-    useState<number | undefined>(
-      initialLatitude,
-    );
-
-  const [longitude, setLongitude] =
-    useState<number | undefined>(
-      initialLongitude,
-    );
-
   const [status, setStatus] =
     useState<
       "idle" |
@@ -56,11 +51,8 @@ export function LocationPicker({
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        setLatitude(
+        onLocationChange?.(
           position.coords.latitude,
-        );
-
-        setLongitude(
           position.coords.longitude,
         );
 
@@ -101,8 +93,11 @@ export function LocationPicker({
 
 
   function clearLocation(): void {
-    setLatitude(undefined);
-    setLongitude(undefined);
+    onLocationChange?.(
+      undefined,
+      undefined,
+    );
+
     setStatus("idle");
     setMessage("");
   }
@@ -120,18 +115,6 @@ export function LocationPicker({
         KiwiKids does not need to save your
         precise location for this search.
       </p>
-
-      <input
-        type="hidden"
-        name="latitude"
-        value={latitude ?? ""}
-      />
-
-      <input
-        type="hidden"
-        name="longitude"
-        value={longitude ?? ""}
-      />
 
       <div className="mt-4 flex flex-wrap gap-2">
         <button

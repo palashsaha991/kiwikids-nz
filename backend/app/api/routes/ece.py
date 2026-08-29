@@ -9,11 +9,14 @@ from app.repositories.ece_service import (
     get_ece_service_by_slug,
     list_ece_services,
     list_recommendation_candidates,
+    list_ece_location_facets,
 )
 from app.schemas.ece_service import (
     ECERecommendationItemResponse,
     ECERecommendationListResponse,
+    ECERecommendationRequest,
     ECERecommendationReasonResponse,
+    ECEFacetsResponse,
     ECEServiceListResponse,
     ECEServiceResponse,
 )
@@ -142,74 +145,38 @@ def get_ece_services(
 
 
 @router.get(
+    "/facets",
+    response_model=ECEFacetsResponse,
+)
+def get_ece_facets(
+    session: DatabaseSession,
+) -> ECEFacetsResponse:
+    return ECEFacetsResponse(
+        areas=list_ece_location_facets(
+            session,
+        )
+    )
+
+
+@router.post(
     "/recommendations",
     response_model=ECERecommendationListResponse,
 )
 def get_ece_recommendations(
+    payload: ECERecommendationRequest,
     session: DatabaseSession,
-    suburb: Annotated[
-        str | None,
-        Query(
-            min_length=1,
-            max_length=120,
-        ),
-    ] = None,
-    service_type: Annotated[
-        str | None,
-        Query(
-            min_length=1,
-            max_length=80,
-        ),
-    ] = None,
-    wants_20_hours_ece: bool | None = None,
-    minimum_capacity: Annotated[
-        int | None,
-        Query(
-            ge=1,
-            le=1000,
-        ),
-    ] = None,
-    latitude: Annotated[
-        float | None,
-        Query(
-            ge=-90,
-            le=90,
-        ),
-    ] = None,
-    longitude: Annotated[
-        float | None,
-        Query(
-            ge=-180,
-            le=180,
-        ),
-    ] = None,
-    limit: Annotated[
-        int,
-        Query(
-            ge=1,
-            le=50,
-        ),
-    ] = 10,
 ) -> ECERecommendationListResponse:
-    if (
-        (latitude is None)
-        != (longitude is None)
-    ):
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=(
-                "latitude and longitude must "
-                "be supplied together."
-            ),
-        )
-
     preferences = RecommendationPreferences(
-        suburb=suburb,
-        service_type=service_type,
-        wants_20_hours_ece=wants_20_hours_ece,
-        minimum_capacity=minimum_capacity,
-        latitude=latitude,
-        longitude=longitude,
+        suburb=payload.suburb,
+        service_type=payload.service_type,
+        wants_20_hours_ece=(
+            payload.wants_20_hours_ece
+        ),
+        minimum_capacity=(
+            payload.minimum_capacity
+        ),
+        latitude=payload.latitude,
+        longitude=payload.longitude,
     )
 
     candidates = list_recommendation_candidates(
@@ -250,13 +217,18 @@ def get_ece_recommendations(
                     factor=reason.factor,
                     matched=reason.matched,
                     points_earned=reason.points_earned,
-                    points_available=reason.points_available,
-                    explanation=reason.explanation,
+                    points_available=(
+                        reason.points_available
+                    ),
+                    explanation=(
+                        reason.explanation
+                    ),
                 )
                 for reason in score.reasons
             ],
         )
-        for service, score in scored[:limit]
+        for service, score
+        in scored[:payload.limit]
     ]
 
     return ECERecommendationListResponse(
