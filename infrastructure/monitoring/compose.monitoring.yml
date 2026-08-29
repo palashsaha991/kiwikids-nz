@@ -33,14 +33,14 @@ services:
 
     environment:
       DATA_SOURCE_URI: "postgres:5432/kiwikids?sslmode=disable"
-      DATA_SOURCE_USER: "kiwikids_runtime"
-      DATA_SOURCE_PASS_FILE: /run/secrets/runtime_db_password
+      DATA_SOURCE_USER: "kiwikids_monitor"
+      DATA_SOURCE_PASS_FILE: /run/secrets/monitor_db_password
 
     command:
       - --no-collector.wal
 
     secrets:
-      - runtime_db_password
+      - monitor_db_password
 
     group_add:
       - "10001"
@@ -90,6 +90,9 @@ services:
 secrets:
   runtime_db_password:
     file: /srv/kiwikids-secrets/runtime_db_password
+
+  monitor_db_password:
+    file: /srv/kiwikids-secrets/monitor_db_password
 
   grafana_admin_password:
     file: /srv/kiwikids-secrets/grafana_admin_password
